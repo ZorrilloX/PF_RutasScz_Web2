@@ -20,15 +20,11 @@ export class CarreterasController {
         return this.carreterasService.createCarretera(carreteraData, usuarioId);
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles("administrador", "verificador")
     @Get()
     async findAll(): Promise<Carreteras[]> {
         return this.carreterasService.findAll();
     }
 
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles("administrador", "verificador")
     @Get(":id")
     async findById(@Param("id") id: number): Promise<Carreteras> {
         return this.carreterasService.findById(id);

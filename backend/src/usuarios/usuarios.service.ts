@@ -40,14 +40,27 @@ export class UsuariosService {
         if (!usuarioDB) {
             throw new NotFoundException("Usuario no encontrado");
         }
-
-        // Si hay una nueva contraseña, la encriptamos
-        if (usuarioData.password) {
-            usuarioData.password = await bcrypt.hash(usuarioData.password, 10);
+        //verificar si existe el email nuevo:
+        if (usuarioData.email && usuarioData.email !== usuarioDB.email) {
+            const emailExists = await this.usuariosRepository.findOneBy({ email: usuarioData.email });
+            if (emailExists) {
+                throw new UnauthorizedException("Email ya registrado");
+            }
+            usuarioDB.email = usuarioData.email;
         }
-
         await this.usuariosRepository.update(id, usuarioData);
         return this.usuariosRepository.findOneBy({ id });
+    }
+
+    //Actualizar solo la contrasenia
+    async updatePassword(id: number, password: string): Promise<string> {
+        const usuarioDB = await this.findById(id);
+        if (!usuarioDB) throw new NotFoundException("Usuario no encontrado");
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        usuarioDB.password = hashedPassword;
+        await this.usuariosRepository.update(id, usuarioDB);
+        return "Contraseña Actualizada";
     }
 
     // Eliminar un usuario

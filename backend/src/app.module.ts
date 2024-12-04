@@ -41,7 +41,7 @@ import { ImagenesService } from "./imagen-service/imagen-service.service";
         TypeOrmModule.forFeature([Usuarios, Municipios, Carreteras, Incidentes, Logs]),
         JwtModule.register({
             secret: "INDIGO es el mejor <3",
-            signOptions: { expiresIn: "1h" },
+            signOptions: { expiresIn: "6h" },
         }),
         ServeStaticModule.forRoot({
             //config para las imagenes

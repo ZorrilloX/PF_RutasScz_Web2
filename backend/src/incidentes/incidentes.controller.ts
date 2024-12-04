@@ -1,9 +1,12 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, Req, UploadedFile, BadRequestException } from "@nestjs/common";
+import { Controller, Post, Body, Get, Param, Put, Delete, Req, UploadedFile, BadRequestException, UseGuards } from "@nestjs/common";
 import { IncidentesService } from "./incidentes.service";
 import { CrearIncidenteDto, ActualizarIncidenteDto } from "./dto/incidentes.dto";
 import { CustomRequest } from "src/auth/custom-request.interface";
 import { UploadImage } from "src/decorators/upload.decorator";
 import { ImagenesService } from "src/imagen-service/imagen-service.service";
+import { Roles } from "src/auth/roles.decorator";
+import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { RolesGuard } from "src/auth/roles.guard";
 
 @Controller("incidentes")
 export class IncidentesController {
@@ -14,9 +17,10 @@ export class IncidentesController {
 
     // Crear un nuevo incidente
     @Post()
-    crearIncidente(@Body() incidenteData: CrearIncidenteDto, @Req() req: CustomRequest) {
+    async crearIncidente(@Body() incidenteData: CrearIncidenteDto, @Req() req: CustomRequest) {
         const usuarioId = req.user?.id;
-        return this.incidentesService.crearIncidente(incidenteData, usuarioId);
+        const incidente = this.incidentesService.crearIncidente(incidenteData, usuarioId);
+        return incidente;
     }
 
     // Obtener todos los incidentes verificados (público)
@@ -26,12 +30,25 @@ export class IncidentesController {
     }
 
     // Obtener todos los incidentes (administradores/verificadores)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles("administrador", "verificador")
     @Get("admin")
     getIncidentesAdmin() {
         return this.incidentesService.findAllAdmin();
     }
 
+    @Get(":id/IdDeCarretera") //conseguimos con el id de carretera el primer indicente validado.
+    async obtenerUltimoIncidenteVerificado(@Param("id") id: string) {
+        const incidente = await this.incidentesService.obtenerUltimoIncidenteVerificadoPorCarretera(Number(id));
+        if (!incidente) {
+            return { mensaje: "No se encontró ningún incidente verificado para esta carretera" };
+        }
+        return { incidenteId: incidente.id };
+    }
+
     // Validar un incidente (verificador)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles("administrador", "verificador")
     @Put(":id/validar")
     validarIncidente(@Param("id") id: number, @Body() incidenteData: ActualizarIncidenteDto, @Req() req: CustomRequest) {
         const usuarioId = req.user?.id;
@@ -39,6 +56,8 @@ export class IncidentesController {
     }
 
     // Editar un incidente
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles("administrador", "verificador")
     @Put(":id")
     editarIncidente(@Param("id") id: number, @Body() incidenteData: CrearIncidenteDto, @Req() req: CustomRequest) {
         const usuarioId = req.user?.id;
@@ -46,6 +65,8 @@ export class IncidentesController {
     }
 
     // Eliminar un incidente
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles("administrador", "verificador")
     @Delete(":id")
     async eliminarIncidente(@Param("id") id: number, @Req() req: CustomRequest, @UploadedFile() archivo: Express.Multer.File) {
         const usuarioId = req.user?.id;
@@ -54,7 +75,7 @@ export class IncidentesController {
         return this.incidentesService.eliminarIncidente(id, usuarioId);
     }
 
-    @Post(":id/upload")
+    @Post(":id/upload-image")
     @UploadImage()
     async uploadImagenIncidente(@Param("id") id: number, @UploadedFile() archivo: Express.Multer.File): Promise<string> {
         if (!archivo) throw new BadRequestException("Archivo de imagen no proporcionado");

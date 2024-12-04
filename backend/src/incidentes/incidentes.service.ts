@@ -48,6 +48,16 @@ export class IncidentesService {
         });
     }
 
+    async obtenerUltimoIncidenteVerificadoPorCarretera(carreteraId: number): Promise<Incidentes | null> {
+        return await this.incidentesRepository.findOne({
+            where: {
+                carretera: { id: carreteraId },
+                verificado: true,
+            },
+            order: { updatedAt: "DESC" },
+        });
+    }
+
     // Validar un incidente
     async validarIncidente(id: number, incidenteData: ActualizarIncidenteDto, usuarioId: number): Promise<Incidentes> {
         const incidente = await this.incidentesRepository.findOneBy({ id });

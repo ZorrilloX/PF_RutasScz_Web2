@@ -5,8 +5,6 @@ import { UsuarioDto, UpdateUsuarioDto } from "./dto/usuarios.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { RolesGuard } from "../auth/roles.guard";
 import { Roles } from "../auth/roles.decorator";
-import * as bcrypt from "bcrypt";
-
 @Controller("usuarios")
 export class UsuariosController {
     constructor(private usuariosService: UsuariosService) {}
@@ -66,15 +64,10 @@ export class UsuariosController {
     // Cambiar contraseña (Solo administradores)
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles("administrador")
-    @Post(":id/cambiar-contrasena")
-    async changePassword(@Param("id") id: number, @Body() passwordData: { password: string }): Promise<Usuarios> {
-        const usuario = await this.usuariosService.findById(id);
-        if (!usuario) {
-            throw new NotFoundException("Usuario no encontrado");
-        }
-        usuario.password = await bcrypt.hash(passwordData.password, 10);
-        await this.usuariosService.updateUsuario(id, usuario);
-        return usuario;
+    @Put(":id/cambiar-password")
+    async changePassword(@Param("id") id: number, @Body() passwordData: { password: string }) {
+        await this.usuariosService.updatePassword(id, passwordData.password);
+        return "Contraseña cambiada exitosamente";
     }
 
     // Iniciar sesión con email y password

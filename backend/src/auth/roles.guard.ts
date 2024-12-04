@@ -18,8 +18,8 @@ export class RolesGuard implements CanActivate {
         const decoded = this.jwtService.decode(token) as any;
         const roles = this.reflector.get<string[]>("roles", context.getHandler());
 
-        console.log("Token decodificado:", decoded); // Verifica que el rol esté en "rol"
-        console.log("Roles requeridos:", roles); // Asegúrate de que los roles que se están pasando son correctos
+        console.log("Token decodificado:", decoded); // verifica que el rol este en "rol" joder odio la progamacion...
+        console.log("Roles requeridos:", roles);
 
         if (roles) {
             console.log("Comprobando si el rol del usuario está en los roles permitidos...");

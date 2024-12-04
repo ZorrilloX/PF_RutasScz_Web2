@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -28,7 +28,5 @@ export class ImagenesService {
 
             return "Imagen cargada correctamente";
         }
-
-        throw new BadRequestException("No se ha proporcionado un archivo.");
     }
 }

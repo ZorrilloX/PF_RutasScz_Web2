@@ -12,8 +12,6 @@ export class MunicipiosController {
     constructor(private municipiosService: MunicipiosService) {}
 
     // Listar todos los municipios
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles("administrador", "verificador")
     @Get()
     async list(): Promise<Municipios[]> {
         return this.municipiosService.findAll();

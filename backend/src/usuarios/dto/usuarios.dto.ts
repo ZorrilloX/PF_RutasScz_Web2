@@ -16,10 +16,16 @@ export class UsuarioDto {
 
 export class UpdateUsuarioDto {
     @IsNotEmpty()
-    @IsString()
-    password: string;
+    @IsEmail()
+    email: string;
 
     @IsNotEmpty()
     @IsString()
     rol: string; // 'administrador' o 'verificador'
+}
+
+export class UpdatePasswordDto {
+    @IsNotEmpty()
+    @IsString()
+    password: string;
 }

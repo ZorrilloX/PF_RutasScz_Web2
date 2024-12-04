@@ -48,8 +48,12 @@ export class MunicipiosService {
     async deleteMunicipio(id: number, usuarioId: number): Promise<void> {
         const municipio = await this.findById(id);
         if (!municipio) throw new NotFoundException("Municipio no encontrado");
-
-        this.logsService.registrarCambio("municipios", "eliminar", municipio, usuarioId);
-        await this.municipiosRepository.delete(id);
+        //verificar si hay carreteras asociadas
+        try {
+            this.logsService.registrarCambio("municipios", "eliminar", municipio, usuarioId);
+            await this.municipiosRepository.delete(id);
+        } catch {
+            throw new NotFoundException("No puedes eliminar el municipio, hay carreteras asociadas.");
+        }
     }
 }
