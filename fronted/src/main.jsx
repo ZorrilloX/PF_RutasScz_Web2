@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import App from './App.jsx';
@@ -21,13 +21,21 @@ import GestionLogs from './components/PanelLogs.jsx';
 import PublicView from './components/HOME-RutesScz.jsx';
 
 // Layout para rutas públicas (HomeHeader)
-const PublicLayout = () => (
-  <>
-    <HomeHeader />
-    <Outlet />
-  </>
-);
+const PublicLayout = () => {
+  useEffect(() => {
+    document.body.classList.add("public-layout");
+    return () => {
+      document.body.classList.remove("public-layout");
+    };
+  }, []);
 
+  return (
+    <>
+      <HomeHeader />
+      <Outlet />
+    </>
+  );
+};
 // Layout para rutas privadas (Header)
 const PrivateLayout = () => (
   <>

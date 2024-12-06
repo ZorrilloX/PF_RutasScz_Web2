@@ -50,3 +50,12 @@ body {
   margin: 0;
   color: white; /* Ajusta el color del texto si es necesario */
 }
+
+body.public-layout {
+  background-image: url('./assets/fondo-home.png'); /* Imagen para rutas públicas */
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  margin: 0;
+  color: black; /* Ajusta el color del texto si es necesario */
+}

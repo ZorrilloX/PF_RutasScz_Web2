@@ -15,7 +15,7 @@ const HeaderHome = () => {
     };
 
     return (
-        <Navbar style={{ backgroundColor: '#0e9473' }} variant="dark" expand="lg" className="fixed-top">
+        <Navbar style={{ backgroundColor: '#005459' }} variant="dark" expand="lg" className="fixed-top">
             <Container fluid>
                 <Navbar.Brand className="mx-auto d-flex align-items-center" href="/">
                     <img src={icon} alt="home icon" style={{ width: '40px', marginRight: '10px' }} />
