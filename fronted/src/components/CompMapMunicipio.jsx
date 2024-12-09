@@ -131,7 +131,7 @@ const CompMapMunicipio = ({ municipioData, setMunicipioData }) => {
                             lat: -17.78302580071355,
                             lng: -63.180359841218795,
                         }}
-                        defaultZoom={12}
+                        defaultZoom={6}
                         gestureHandling="greedy"
                         disableDefaultUI={true}
                     />

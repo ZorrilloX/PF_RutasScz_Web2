@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Table, Button, Form, Alert } from "react-bootstrap";
+import { Container, Table, Button, Form, Alert, Modal } from "react-bootstrap";
 import axios from "axios";
 import CompMapMunicipio from "./CompMapIncidentes";
 
@@ -8,6 +8,8 @@ const GestionIncidentes = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [formVisible, setFormVisible] = useState(false);
+    const [showModalFoto, setModalFoto] = useState(false);
+    const [fotoUrl, setFotoUrl] = useState(null);
     const [generalError, setGeneralError] = useState("");
     const [incidenteData, setIncidenteData] = useState({
         tipo: "",
@@ -17,7 +19,7 @@ const GestionIncidentes = () => {
     });
     const [verificados, setVerificados] = useState(false);
     const [carreteras, setCarreteras] = useState([]);
-    const [tiposIncidente] = useState(["Desvíos", "Accidentes", "Obras"]);
+    const [tiposIncidente] = useState(["Bloqueado", "Accidente", "Camino destruido", "Bloqueos del MAS", "Conflictos sociales", "Catastrofe", "Protesta con bloqueo", "Restricción vehicular especial", "Camino cerrado por mantenimiento"]);
 
     const token = localStorage.getItem("token");
 
@@ -136,6 +138,10 @@ const GestionIncidentes = () => {
             setGeneralError(isVerified ? "Error al invalidar el incidente." : "Error al validar el incidente.", error);
         }
     };
+    const handleShowModalFotoIncidente = async (idIncidente) => {
+        setFotoUrl(idIncidente);
+        setModalFoto(true);
+    }
 
     const handleDelete = async (id) => {
         if (window.confirm("¿Estás seguro de eliminar este incidente?")) {
@@ -160,9 +166,33 @@ const GestionIncidentes = () => {
             {!formVisible ? (
                 <>
                  <CompMapMunicipio
-                            incidenteData={incidenteData}
-                            setIncidenteData={setIncidenteData}
-                        />
+                        incidenteData={incidenteData}
+                        setIncidenteData={setIncidenteData}
+                    />
+
+
+                    <Modal show={showModalFoto} onHide={() => setModalFoto(false)}>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Foto del Incidente</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            {fotoUrl ? (
+                                <img
+                                    src={`http://localhost:3000/imagenes/incidentes/${fotoUrl}.jpg`}
+                                    alt="Foto del incidente"
+                                    style={{ width: "100%", maxHeight: "400px", objectFit: "cover" }}
+                                />
+                            ) : (
+                                <p>No se pudo cargar la foto.</p>
+                            )}
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={() => setModalFoto(false)}>
+                                Cerrar
+                            </Button>
+                        </Modal.Footer>
+                    </Modal>
+
                     <div className="mb-3">
                         <Button onClick={handleCreate} style={{ marginRight: "10px" }}>
                             Crear Incidente
@@ -180,6 +210,7 @@ const GestionIncidentes = () => {
                                 <th>ID</th>
                                 <th>Tipo</th>
                                 <th>Descripción</th>
+                                <th>Fecha</th>
                                 <th>Carretera</th>
                                 <th>Acciones</th>
                             </tr>
@@ -192,11 +223,12 @@ const GestionIncidentes = () => {
                                         <td>{incidente.id}</td>
                                         <td>{incidente.tipo}</td>
                                         <td>{incidente.descripcion}</td>
+                                        <td>{incidente.createdAt}</td>
                                         <td>{incidente.carretera?.nombre}</td>
                                         <td>
                                             <Button
                                                 variant={incidente.verificado ? "warning" : "success"}
-                                                className="me-2"
+                                                className="me-1"
                                                 onClick={() =>
                                                     handleValidate(incidente.id, incidente.verificado)
                                                 }
@@ -204,7 +236,14 @@ const GestionIncidentes = () => {
                                                 {incidente.verificado ? "Invalidar" : "Validar"}
                                             </Button>
                                             <Button
-                                                className="me-2"
+                                                variant="info"
+                                                className="me-1"
+                                                onClick={() => handleShowModalFotoIncidente(incidente.id)}
+                                                >
+                                                Ver foto
+                                            </Button>
+                                            <Button
+                                                className="me-1"
                                                 onClick={() => handleEdit(incidente)}
                                             >
                                                 Editar

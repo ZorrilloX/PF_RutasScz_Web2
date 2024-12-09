@@ -18,11 +18,12 @@ const PaginaPrincipal = () => {
     });
     const [carreteras, setCarreteras] = useState([]);
     const [showModalForm, setShowModalForm] = useState(false); // Controla el popup del formulario
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [selectedCarretera, setSelectedCarretera] = useState(null);
     const [selectedCarreteraMap, setSelectedCarreteraMap] = useState(null);
     const [showModal, setShowModal] = useState(false); // Modal para el motivo de bloqueo
     const [filtroEstado, setFiltroEstado] = useState(""); // Estado para el filtro de estado en tablas y mapa
-
+    const [tiposIncidente] = useState(["Bloqueado", "Accidente", "Camino destruido", "Bloqueos del MAS", "Conflictos sociales", "Catastrofe", "Protesta con bloqueo", "Restricción vehicular especial", "Camino cerrado por mantenimiento"]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -47,24 +48,20 @@ const PaginaPrincipal = () => {
     // Función para manejar el botón "Ver carretera"
     const handleVerCarretera = (carretera) => {
         console.log(`Resaltando en el mapa la carretera: ${carretera.nombre}`);
-        //hacer que la pagina se centre
         window.scrollTo({
             top: 140,
-            behavior: 'smooth' // Esto hace que el desplazamiento sea suave
+            behavior: 'smooth'
         });
 
         setSelectedCarreteraMap(carretera);
-        // Aquí puedes enviar la información al mapa para resaltarlo
     };
 
     // Función para abrir el modal con el motivo de bloqueo
     const handleVerMotivo = async (carretera) => {
-        //encontrar el id de carretera con un nuevo endpoint get
         const motivoRes = await axios.get(`http://localhost:3000/incidentes/${carretera.id}/IdDeCarretera`);
         console.log(motivoRes.data);
-        //actualizar carretera.id
         carretera.incidenteId = motivoRes.data.incidenteId;
-        //mostrar el modal con el motivo de bloqueo
+        console.log(carretera.incidenteId);
         setSelectedCarretera(carretera);
         setShowModal(true);
     };
@@ -104,7 +101,8 @@ const PaginaPrincipal = () => {
                 await axios.post(`http://localhost:3000/incidentes/${incidenteId}/upload-image`, formData);
             }
 
-            setShowModalForm(false); // Cerrar el modal
+            setShowModalForm(false);
+            setShowSuccessModal(true);
         } catch (error) {
             setGeneralError(error.response?.data?.message || "Error al guardar el incidente.");
             window.scrollTo(0, 0);
@@ -137,7 +135,7 @@ const PaginaPrincipal = () => {
                     <span style={{ fontSize: '3.5rem', fontWeight: 'bold' }}>RutasScz</span>
                 </div>
                 <Button
-                    variant="primary"
+                    variant="warning"
                     onClick={handleCreate}
                     style={{
                         padding: '12px 20px',
@@ -148,7 +146,7 @@ const PaginaPrincipal = () => {
                     }}
                     className="ms-3" // Espacio entre el título y el botón
                 ><img src={imgIncidente} alt="" style={{width:"30px", margin:"5px"}}></img>
-                    Reportar un incidente
+                    Marca el punto y repota un incidente
                 </Button>
             </h1>
 
@@ -218,6 +216,21 @@ const PaginaPrincipal = () => {
                 </div>
             </div>
 
+            <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>¡Éxito!</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>El incidente se ha guardado exitosamente.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="primary" onClick={() => setShowSuccessModal(false)}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
 
             {/* Modal de motivo de bloqueo */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -251,7 +264,7 @@ const PaginaPrincipal = () => {
                 <Modal.Body>
                     <Form>
                         <Form.Group>
-                            <Form.Label>Foto del incidente</Form.Label>
+                            <Form.Label>Mandanos una foto</Form.Label>
                             <Form.Control
                                 type="file"
                                 accept="image/*"
@@ -261,15 +274,20 @@ const PaginaPrincipal = () => {
                         <Form.Group controlId="formTipo">
                             <Form.Label>Tipo de incidente</Form.Label>
                             <Form.Control
-                                type="text"
-                                placeholder="Tipo de incidente"
-                                value={incidenteData.tipo}
+                                as="select"
                                 onChange={(e) => setIncidenteData({ ...incidenteData, tipo: e.target.value })}
-                            />
+                            >
+                                <option value="">que pasó ahi?</option>
+                                {tiposIncidente.map((tipo) =>(
+                                    <option key={tipo} value={tipo}>
+                                        {tipo}
+                                    </option>
+                                ))}
+                            </Form.Control>
                         </Form.Group>
 
                         <Form.Group controlId="formDescripcion">
-                            <Form.Label>Descripción</Form.Label>
+                            <Form.Label>Hablanos en detalle</Form.Label>
                             <Form.Control
                                 as="textarea"
                                 rows={3}
@@ -280,7 +298,7 @@ const PaginaPrincipal = () => {
                         </Form.Group>
 
                         <Form.Group controlId="formCarretera">
-                            <Form.Label>Carretera</Form.Label>
+                            <Form.Label>¿Qué carretera esta siendo afectada?</Form.Label>
                             <Form.Control
                                 as="select"
                                 value={incidenteData.carreteraId}
@@ -296,7 +314,7 @@ const PaginaPrincipal = () => {
                         </Form.Group>
 
                         <Form.Group controlId="formUbicacion">
-                            <Form.Label>Ubicación</Form.Label>
+                            <Form.Label>La Ubicacion que marcaste</Form.Label>
                             <Form.Control
                                 type="text"
                                 readOnly
